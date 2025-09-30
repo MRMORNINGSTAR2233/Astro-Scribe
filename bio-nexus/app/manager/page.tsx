@@ -13,6 +13,7 @@ import {
   LineChart,
   Line,
 } from "recharts"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -42,37 +43,59 @@ export default function ManagerPage() {
         </p>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-border/60 bg-background/50 p-4 backdrop-blur">
-            <div className="mb-2 text-sm font-medium">Team Capacity (Stacked)</div>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={capacity}>
-                  <CartesianGrid stroke="color-mix(in oklch, canvas, transparent 92%)" vertical={false} />
-                  <XAxis dataKey="team" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar stackId="a" dataKey="ops" fill="var(--color-chart-1)" />
-                  <Bar stackId="a" dataKey="research" fill="var(--color-chart-2)" />
-                  <Bar stackId="a" dataKey="overhead" fill="var(--color-chart-3)" />
-                </BarChart>
-              </ResponsiveContainer>
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-4 backdrop-blur">
+            <GlowingEffect
+              spread={35}
+              glow={true}
+              disabled={false}
+              proximity={55}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.3}
+            />
+            <div className="relative">
+              <div className="mb-2 text-sm font-medium">Team Capacity (Stacked)</div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={capacity}>
+                    <CartesianGrid stroke="color-mix(in oklch, canvas, transparent 92%)" vertical={false} />
+                    <XAxis dataKey="team" tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar stackId="a" dataKey="ops" fill="var(--color-chart-1)" />
+                    <Bar stackId="a" dataKey="research" fill="var(--color-chart-2)" />
+                    <Bar stackId="a" dataKey="overhead" fill="var(--color-chart-3)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-4 backdrop-blur">
-            <div className="mb-2 text-sm font-medium">Schedule Fidelity</div>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeline}>
-                  <CartesianGrid stroke="color-mix(in oklch, canvas, transparent 92%)" vertical={false} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="completed" stroke="var(--color-chart-1)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="scheduled" stroke="var(--color-chart-3)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-4 backdrop-blur">
+            <GlowingEffect
+              spread={35}
+              glow={true}
+              disabled={false}
+              proximity={55}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.3}
+            />
+            <div className="relative">
+              <div className="mb-2 text-sm font-medium">Schedule Fidelity</div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={timeline}>
+                    <CartesianGrid stroke="color-mix(in oklch, canvas, transparent 92%)" vertical={false} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="completed" stroke="var(--color-chart-1)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="scheduled" stroke="var(--color-chart-3)" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>

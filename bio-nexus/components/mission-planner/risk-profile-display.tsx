@@ -1,5 +1,7 @@
 "use client"
 
+import { GlowingEffect } from "@/components/ui/glowing-effect"
+
 export function RiskProfileDisplay({
   profile,
   isLoading,
@@ -18,10 +20,21 @@ export function RiskProfileDisplay({
           {profile.rankedRisks.map((r) => (
             <li
               key={r.category}
-              className="flex items-center justify-between rounded-md border border-border/80 px-3 py-2"
+              className="relative flex items-center justify-between rounded-md border border-border/80 px-3 py-2"
             >
-              <span className="text-sm text-foreground">{r.category}</span>
-              <span className="text-xs text-muted-foreground">{Math.round(r.score * 100)}%</span>
+              <GlowingEffect
+                spread={20}
+                glow={true}
+                disabled={false}
+                proximity={35}
+                inactiveZone={0.25}
+                borderWidth={1}
+                movementDuration={0.8}
+              />
+              <div className="relative flex items-center justify-between w-full">
+                <span className="text-sm text-foreground">{r.category}</span>
+                <span className="text-xs text-muted-foreground">{Math.round(r.score * 100)}%</span>
+              </div>
             </li>
           ))}
         </ul>

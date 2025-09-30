@@ -4,6 +4,7 @@ import { MissionPlannerForm } from "@/components/mission-planner/mission-planner
 import { useMutation } from "@tanstack/react-query"
 import { RiskProfileDisplay } from "@/components/mission-planner/risk-profile-display"
 import { useState } from "react"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 type Risk = { category: string; score: number }
 type RiskProfile = { rankedRisks: Risk[]; knowledgeGaps: string[] }
@@ -34,11 +35,33 @@ export default function MissionPlannerPage() {
         <p className="mt-1 text-muted-foreground">Estimate mission risks and identify knowledge gaps.</p>
 
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-lg border border-border bg-background/40 p-4 backdrop-blur-sm">
-            <MissionPlannerForm onSubmit={(values) => mutate(values)} isSubmitting={isPending} />
+          <div className="relative rounded-lg border border-border bg-background/40 p-4 backdrop-blur-sm">
+            <GlowingEffect
+              spread={32}
+              glow={true}
+              disabled={false}
+              proximity={50}
+              inactiveZone={0.12}
+              borderWidth={2}
+              movementDuration={1.4}
+            />
+            <div className="relative">
+              <MissionPlannerForm onSubmit={(values) => mutate(values)} isSubmitting={isPending} />
+            </div>
           </div>
-          <div className="rounded-lg border border-border bg-background/40 p-4 backdrop-blur-sm">
-            <RiskProfileDisplay profile={result} isLoading={isPending} />
+          <div className="relative rounded-lg border border-border bg-background/40 p-4 backdrop-blur-sm">
+            <GlowingEffect
+              spread={32}
+              glow={true}
+              disabled={false}
+              proximity={50}
+              inactiveZone={0.12}
+              borderWidth={2}
+              movementDuration={1.4}
+            />
+            <div className="relative">
+              <RiskProfileDisplay profile={result} isLoading={isPending} />
+            </div>
           </div>
         </div>
       </main>

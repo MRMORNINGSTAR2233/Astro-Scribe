@@ -2,6 +2,7 @@ import Link from "next/link"
 import WebGLShaderBackground from "@/components/ui/web-gl-shader"
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button"
 import { CTASection } from "@/components/sections/cta"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 export default function LandingPage() {
   return (
@@ -26,20 +27,53 @@ export default function LandingPage() {
 
           {/* Highlights */}
           <section className="mx-auto grid max-w-4xl grid-cols-1 gap-4 px-6 md:grid-cols-3">
-            <div className="rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
-              <p className="text-sm text-muted-foreground">Datasets</p>
-              <p className="text-2xl font-semibold text-foreground">120k+</p>
-              <p className="mt-1 text-xs text-muted-foreground">Curated bioscience records</p>
+            <div className="relative rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
+              <GlowingEffect
+                spread={25}
+                glow={true}
+                disabled={false}
+                proximity={40}
+                inactiveZone={0.2}
+                borderWidth={1.5}
+                movementDuration={1}
+              />
+              <div className="relative">
+                <p className="text-sm text-muted-foreground">Datasets</p>
+                <p className="text-2xl font-semibold text-foreground">120k+</p>
+                <p className="mt-1 text-xs text-muted-foreground">Curated bioscience records</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
-              <p className="text-sm text-muted-foreground">Publications</p>
-              <p className="text-2xl font-semibold text-foreground">48k+</p>
-              <p className="mt-1 text-xs text-muted-foreground">Cross-mission insights</p>
+            <div className="relative rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
+              <GlowingEffect
+                spread={25}
+                glow={true}
+                disabled={false}
+                proximity={40}
+                inactiveZone={0.2}
+                borderWidth={1.5}
+                movementDuration={1}
+              />
+              <div className="relative">
+                <p className="text-sm text-muted-foreground">Publications</p>
+                <p className="text-2xl font-semibold text-foreground">48k+</p>
+                <p className="mt-1 text-xs text-muted-foreground">Cross-mission insights</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
-              <p className="text-sm text-muted-foreground">Hypotheses</p>
-              <p className="text-2xl font-semibold text-foreground">AI-assisted</p>
-              <p className="mt-1 text-xs text-muted-foreground">Rigorous, explainable outputs</p>
+            <div className="relative rounded-lg border border-border/80 bg-background/40 p-4 backdrop-blur-sm">
+              <GlowingEffect
+                spread={25}
+                glow={true}
+                disabled={false}
+                proximity={40}
+                inactiveZone={0.2}
+                borderWidth={1.5}
+                movementDuration={1}
+              />
+              <div className="relative">
+                <p className="text-sm text-muted-foreground">Hypotheses</p>
+                <p className="text-2xl font-semibold text-foreground">AI-assisted</p>
+                <p className="mt-1 text-xs text-muted-foreground">Rigorous, explainable outputs</p>
+              </div>
             </div>
           </section>
 

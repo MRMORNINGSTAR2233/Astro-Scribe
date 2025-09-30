@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 
 export function CTASection() {
   return (
@@ -15,74 +16,128 @@ export function CTASection() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Core Features */}
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">🤖</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">RAG-Powered Q&A</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               Ask complex questions in natural language and get accurate, source-cited answers from 120k+ datasets.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">🔬</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">Hypothesis Generator</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               AI identifies research gaps and suggests novel, testable hypotheses for future scientific investigation.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">🚀</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">Mission Risk Forecaster</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               Generate comprehensive risk profiles for future missions with biological countermeasures and research gaps.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">📊</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">Data Visualization Suite</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               Interactive timelines, trend charts, and knowledge graph explorer for comprehensive data analysis.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">🔗</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">Cross-Disciplinary Connector</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               Discover non-obvious connections between different fields of study within the bioscience dataset.
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
-            <div className="mb-4">
+          <div className="relative rounded-xl border border-border/60 bg-background/50 p-6 backdrop-blur">
+            <GlowingEffect
+              spread={30}
+              glow={true}
+              disabled={false}
+              proximity={48}
+              inactiveZone={0.1}
+              borderWidth={2}
+              movementDuration={1.2}
+            />
+            <div className="relative">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                 <span className="text-primary text-xl">✅</span>
               </div>
               <h3 className="text-lg font-semibold text-foreground">Explainable AI</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-3">
               Every AI-generated insight includes direct citations and links to original source documents.
             </p>
           </div>
@@ -127,14 +182,23 @@ export function CTASection() {
       </div>
 
       {/* CTA Section */}
-      <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background/50 p-6 text-center backdrop-blur md:flex-row md:text-left mb-16">
-        <div>
+      <div className="relative flex flex-col items-center justify-between gap-4 rounded-2xl border border-border/60 bg-background/50 p-6 text-center backdrop-blur md:flex-row md:text-left mb-16">
+        <GlowingEffect
+          spread={35}
+          glow={true}
+          disabled={false}
+          proximity={56}
+          inactiveZone={0.15}
+          borderWidth={2}
+          movementDuration={1.5}
+        />
+        <div className="relative">
           <h3 className="text-xl font-semibold text-foreground md:text-2xl">Ready to explore the future of space biology?</h3>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Access 120k+ datasets, generate AI-powered insights, and accelerate space exploration research.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 relative">
           <Link href="/dashboard">
             <LiquidGlassButton>Open Dashboard</LiquidGlassButton>
           </Link>
