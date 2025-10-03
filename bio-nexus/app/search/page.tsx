@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Loader2, Mic, MicOff, Send, FileText, Brain, History, Sparkles } from 'lucide-react'
+import { Loader2, Mic, MicOff, Send, FileText, Brain, History, Sparkles, Menu, ChevronLeft } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import Link from 'next/link'
 
@@ -205,56 +205,62 @@ export default function ConversationalSearchPage() {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      {showSidebar && (
-        <div className="w-80 border-r bg-muted/20 flex flex-col">
-          <div className="p-4 border-b">
-            <Button onClick={createNewSession} className="w-full">
-              <Sparkles className="h-4 w-4 mr-2" />
-              New Chat
-            </Button>
-          </div>
-          
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-2">
-              {chatSessions.map((session) => (
-                <div
-                  key={session.id}
-                  onClick={() => loadSession(session.id)}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted ${
-                    currentSessionId === session.id ? 'bg-muted' : ''
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium truncate">{session.title}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {session.messageCount} messages • {new Date(session.lastMessageAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <History className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+      <div className={`${showSidebar ? 'w-80' : 'w-0'} transition-all duration-300 border-r bg-muted/20 flex flex-col overflow-hidden`}>
+        <div className="p-4 border-b">
+          <Button onClick={createNewSession} className="w-full">
+            <Sparkles className="h-4 w-4 mr-2" />
+            New Chat
+          </Button>
         </div>
-      )}
+        
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-2">
+            {chatSessions.map((session) => (
+              <div
+                key={session.id}
+                onClick={() => loadSession(session.id)}
+                className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted ${
+                  currentSessionId === session.id ? 'bg-muted' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-medium truncate">{session.title}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {session.messageCount} messages • {new Date(session.lastMessageAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <History className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="border-b p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Bio-Nexus Assistant</h1>
-              <p className="text-muted-foreground">Ask questions about space biology research papers</p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="p-2"
+              >
+                {showSidebar ? (
+                  <ChevronLeft className="h-4 w-4" />
+                ) : (
+                  <Menu className="h-4 w-4" />
+                )}
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold">Bio-Nexus Assistant</h1>
+                <p className="text-muted-foreground">Ask questions about space biology research papers</p>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              onClick={() => setShowSidebar(!showSidebar)}
-            >
-              <History className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
@@ -371,7 +377,7 @@ export default function ConversationalSearchPage() {
               <div className="flex-1 relative">
                 <Input
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                   placeholder="Ask me about space biology research..."
                   disabled={isLoading}
                   className="pr-12"

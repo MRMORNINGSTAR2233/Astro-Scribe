@@ -9,12 +9,38 @@ import { PDFProcessor } from '@/lib/pdf-processor'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Upload API: Starting file upload process')
+    
+    // Check content type
+    const contentType = request.headers.get('content-type')
+    if (!contentType || !contentType.includes('multipart/form-data')) {
+      return NextResponse.json(
+        { error: 'Request must be multipart/form-data' },
+        { status: 400 }
+      )
+    }
+    
     const formData = await request.formData()
+    console.log('Upload API: FormData extracted successfully')
+    
     const files = formData.getAll('files') as File[]
+    console.log('Upload API: Files extracted from FormData:', files.length)
     
     if (!files || files.length === 0) {
+      console.log('Upload API: No files found in request')
       return NextResponse.json(
         { error: 'No files uploaded' },
+        { status: 400 }
+      )
+    }
+
+    // Additional validation for files array
+    const validFiles = files.filter(f => f && f instanceof File && f.name)
+    console.log('Upload API: Valid files count:', validFiles.length)
+    
+    if (validFiles.length === 0) {
+      return NextResponse.json(
+        { error: 'No valid files found in upload' },
         { status: 400 }
       )
     }
@@ -29,22 +55,43 @@ export async function POST(request: NextRequest) {
     const results = []
     const errors = []
 
-    for (const file of files) {
+    for (const file of validFiles) {
+      console.log('Upload API: Processing file:', file.name, 'Size:', file.size)
       try {
-        // Validate file type
-        if (!file.name.toLowerCase().endsWith('.pdf')) {
+        // Validate file object
+        if (!file || !file.name) {
           errors.push({
-            filename: file.name,
+            filename: 'Unknown file',
+            error: 'Invalid file object - missing name property'
+          })
+          continue
+        }
+
+        // Validate file type
+        const fileName = file.name || ''
+        if (!fileName.toLowerCase().endsWith('.pdf')) {
+          errors.push({
+            filename: fileName || 'Unknown file',
             error: 'Only PDF files are supported'
           })
           continue
         }
 
         // Validate file size (50MB limit)
-        if (file.size > 50 * 1024 * 1024) {
+        const fileSize = file.size || 0
+        if (fileSize > 50 * 1024 * 1024) {
           errors.push({
-            filename: file.name,
+            filename: fileName,
             error: 'File size exceeds 50MB limit'
+          })
+          continue
+        }
+
+        // Validate file has content
+        if (fileSize === 0) {
+          errors.push({
+            filename: fileName,
+            error: 'File appears to be empty'
           })
           continue
         }
@@ -54,7 +101,7 @@ export async function POST(request: NextRequest) {
         
         // Generate unique filename
         const timestamp = Date.now()
-        const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+        const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
         const filename = `${timestamp}_${cleanName}`
         const filepath = path.join(uploadDir, filename)
 
@@ -62,11 +109,11 @@ export async function POST(request: NextRequest) {
         await writeFile(filepath, buffer)
 
         // Process the PDF
-        const processingResult = await processPDF(filepath, file.name)
+        const processingResult = await processPDF(filepath, fileName)
         
         results.push({
-          filename: file.name,
-          size: file.size,
+          filename: fileName,
+          size: fileSize,
           processed: true,
           paperId: processingResult.paperId,
           extractedText: processingResult.extractedText.substring(0, 500) + '...',
@@ -76,9 +123,9 @@ export async function POST(request: NextRequest) {
         })
 
       } catch (error) {
-        console.error(`Error processing ${file.name}:`, error)
+        console.error(`Error processing ${file?.name || 'unknown file'}:`, error)
         errors.push({
-          filename: file.name,
+          filename: file?.name || 'unknown file',
           error: error instanceof Error ? error.message : 'Unknown error occurred'
         })
       }
@@ -102,9 +149,18 @@ export async function POST(request: NextRequest) {
 }
 
 async function processPDF(filepath: string, originalName: string) {
+  console.log('ProcessPDF: Starting PDF processing for:', originalName)
+  
+  // Validate inputs
+  if (!filepath || !originalName) {
+    throw new Error('Missing filepath or originalName parameter')
+  }
+
   // Extract text and metadata from PDF
   const pdfProcessor = new PDFProcessor()
   const extractionResult = await pdfProcessor.extractFromFile(filepath)
+  
+  console.log('ProcessPDF: Text extraction completed, length:', extractionResult.text?.length || 0)
 
   // Insert paper into database
   const client = await pool.connect()

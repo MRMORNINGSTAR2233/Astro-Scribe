@@ -9,10 +9,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { FileText, Upload, CheckCircle, AlertCircle, Loader2, X } from 'lucide-react'
 
-interface UploadFile extends File {
+interface UploadFile {
   id: string
+  name: string
+  size: number
+  type: string
   status: 'pending' | 'uploading' | 'processing' | 'completed' | 'error'
   progress: number
+  file: File // Store the original File object
   error?: string
   result?: {
     paperId: number
@@ -26,14 +30,25 @@ export default function UploadPage() {
   const [files, setFiles] = useState<UploadFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  // Utility function to format file size safely
+  const formatFileSize = (sizeInBytes: number | undefined): string => {
+    if (!sizeInBytes || isNaN(sizeInBytes) || sizeInBytes <= 0) {
+      return 'Size unknown'
+    }
+    const sizeInMB = sizeInBytes / 1024 / 1024
+    return `${sizeInMB.toFixed(2)} MB`
+  }
+
+    const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadFile[] = acceptedFiles.map(file => ({
-      ...file,
       id: Math.random().toString(36).substr(2, 9),
-      status: 'pending',
-      progress: 0
+      status: 'pending' as const,
+      progress: 0,
+      size: file.size,
+      name: file.name,
+      type: file.type,
+      file: file // Store the original File object
     }))
-    
     setFiles(prev => [...prev, ...newFiles])
   }, [])
 
@@ -68,7 +83,7 @@ export default function UploadPage() {
         ))
 
         const formData = new FormData()
-        formData.append('files', file)
+        formData.append('files', file.file) // Use the original File object
 
         const response = await fetch('/api/upload', {
           method: 'POST',
@@ -244,7 +259,7 @@ export default function UploadPage() {
                         <div className="flex-1">
                           <p className="font-medium text-sm">{file.name}</p>
                           <p className="text-xs text-gray-500">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                            {formatFileSize(file.size)}
                           </p>
                         </div>
                       </div>

@@ -88,7 +88,7 @@ export default function DashboardPage() {
           <Input
             placeholder="Search papers by title, authors, or keywords..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>

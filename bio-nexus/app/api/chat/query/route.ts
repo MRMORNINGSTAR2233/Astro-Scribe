@@ -1,28 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Pool } from 'pg'
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-})
+import { pool } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
   try {
-    const { query, sessionId, messageHistory } = await request.json()
+    console.log('Chat query request received')
+    const { message, sessionId, messageHistory } = await request.json()
+    console.log('Request data:', { message, sessionId })
     
     // Perform RAG search to find relevant papers
-    const relevantPapers = await performRAGSearch(query)
+    console.log('Starting RAG search...')
+    const relevantPapers = await performRAGSearch(message)
+    console.log('RAG search completed, found papers:', relevantPapers.length)
     
     // Generate response using RAG
-    const response = await generateRAGResponse(query, relevantPapers, messageHistory)
+    console.log('Generating response...')
+    const response = await generateRAGResponse(message, relevantPapers, messageHistory)
+    console.log('Response generated')
     
     // Fact-check the response
+    console.log('Fact checking...')
     const isFactChecked = await factCheckResponse(response, relevantPapers)
+    console.log('Fact check completed:', isFactChecked)
     
     // Save user message
     if (sessionId) {
-      await saveMessage(sessionId, 'user', query)
-      await saveMessage(sessionId, 'assistant', response, relevantPapers, isFactChecked)
+      console.log('Saving message to database...')
+      await saveMessage(sessionId, message, response, relevantPapers, isFactChecked)
       await updateSessionTimestamp(sessionId)
+      console.log('Message saved successfully')
     }
     
     return NextResponse.json({
@@ -34,61 +39,18 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error processing chat query:', error)
     return NextResponse.json(
-      { error: 'Failed to process query' },
+      { error: 'Failed to process query', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
 }
 
 async function performRAGSearch(query: string) {
-  // Vector search for relevant papers and content
-  const searchQuery = `
-    WITH ranked_chunks AS (
-      SELECT 
-        tc.content,
-        p.id as paper_id,
-        p.title,
-        p.abstract,
-        p.authors,
-        p.publication_year,
-        1 - (tc.embedding <=> plainto_tsquery($1)::text::vector) as similarity_score
-      FROM text_chunks tc
-      JOIN papers p ON tc.paper_id = p.id
-      WHERE tc.embedding IS NOT NULL
-      ORDER BY tc.embedding <=> plainto_tsquery($1)::text::vector
-      LIMIT 10
-    )
-    SELECT 
-      paper_id,
-      title,
-      abstract,
-      authors,
-      publication_year,
-      content,
-      similarity_score
-    FROM ranked_chunks
-    WHERE similarity_score > 0.5
-    ORDER BY similarity_score DESC
-    LIMIT 5
-  `
+  const client = await pool.connect()
   
   try {
-    const result = await pool.query(searchQuery, [query])
-    
-    return result.rows.map(row => ({
-      paperId: row.paper_id,
-      title: row.title,
-      abstract: row.abstract || '',
-      authors: row.authors,
-      year: row.publication_year,
-      snippet: row.content.substring(0, 200) + '...',
-      relevanceScore: parseFloat(row.similarity_score)
-    }))
-  } catch (error) {
-    console.error('Error in vector search:', error)
-    
-    // Fallback to text search
-    const fallbackQuery = `
+    // Use text search for now (since AI services might not be available)
+    const textQuery = `
       SELECT 
         p.id as paper_id,
         p.title,
@@ -96,33 +58,36 @@ async function performRAGSearch(query: string) {
         p.authors,
         p.publication_year,
         tc.content,
-        0.8 as similarity_score
+        ts_rank(
+          to_tsvector('english', p.title || ' ' || COALESCE(p.abstract, '') || ' ' || COALESCE(tc.content, '')),
+          plainto_tsquery('english', $1)
+        ) as relevance_score
       FROM papers p
       LEFT JOIN text_chunks tc ON p.id = tc.paper_id
       WHERE 
-        p.title ILIKE $1 OR 
-        p.abstract ILIKE $1 OR
-        tc.content ILIKE $1
-      ORDER BY 
-        CASE 
-          WHEN p.title ILIKE $1 THEN 3
-          WHEN p.abstract ILIKE $1 THEN 2
-          ELSE 1
-        END DESC
+        to_tsvector('english', p.title || ' ' || COALESCE(p.abstract, '') || ' ' || COALESCE(tc.content, ''))
+        @@ plainto_tsquery('english', $1)
+      ORDER BY relevance_score DESC
       LIMIT 5
     `
     
-    const fallbackResult = await pool.query(fallbackQuery, [`%${query}%`])
+    const result = await client.query(textQuery, [query])
     
-    return fallbackResult.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       paperId: row.paper_id,
       title: row.title,
       abstract: row.abstract || '',
       authors: row.authors,
       year: row.publication_year,
       snippet: (row.content || row.abstract || '').substring(0, 200) + '...',
-      relevanceScore: 0.8
+      relevanceScore: parseFloat(row.relevance_score) || 0.5
     }))
+    
+  } catch (error) {
+    console.error('Error in text search:', error)
+    return []
+  } finally {
+    client.release()
   }
 }
 
@@ -210,27 +175,59 @@ async function factCheckResponse(response: string, relevantPapers: any[]): Promi
   return (groundedTerms / totalTerms) > 0.3
 }
 
-async function saveMessage(sessionId: string, role: string, content: string, sources?: any[], isFactChecked?: boolean) {
-  const query = `
-    INSERT INTO chat_messages (session_id, role, content, sources, is_fact_checked, created_at)
-    VALUES ($1, $2, $3, $4, $5, NOW())
-  `
-  
-  await pool.query(query, [
-    sessionId, 
-    role, 
-    content, 
-    sources ? JSON.stringify(sources) : null,
-    isFactChecked || false
-  ])
+async function saveMessage(sessionId: string, userMessage: string, assistantResponse: string, sources?: any[], isFactChecked?: boolean) {
+  const client = await pool.connect()
+  try {
+    // Ensure session exists
+    await ensureSessionExists(sessionId)
+    
+    const query = `
+      INSERT INTO chat_messages (session_id, message, response, sources, query_type)
+      VALUES ($1, $2, $3, $4, $5)
+    `
+    
+    await client.query(query, [
+      sessionId, 
+      userMessage, 
+      assistantResponse,
+      sources ? JSON.stringify(sources) : null,
+      'rag_search'
+    ])
+  } finally {
+    client.release()
+  }
+}
+
+async function ensureSessionExists(sessionId: string) {
+  const client = await pool.connect()
+  try {
+    const checkQuery = `SELECT id FROM chat_sessions WHERE id = $1`
+    const result = await client.query(checkQuery, [sessionId])
+    
+    if (result.rows.length === 0) {
+      const insertQuery = `
+        INSERT INTO chat_sessions (id, title)
+        VALUES ($1, $2)
+        ON CONFLICT (id) DO NOTHING
+      `
+      await client.query(insertQuery, [sessionId, 'New Chat Session'])
+    }
+  } finally {
+    client.release()
+  }
 }
 
 async function updateSessionTimestamp(sessionId: string) {
-  const query = `
-    UPDATE chat_sessions 
-    SET last_message_at = NOW() 
-    WHERE id = $1
-  `
-  
-  await pool.query(query, [sessionId])
+  const client = await pool.connect()
+  try {
+    const query = `
+      UPDATE chat_sessions 
+      SET updated_at = NOW() 
+      WHERE id = $1
+    `
+    
+    await client.query(query, [sessionId])
+  } finally {
+    client.release()
+  }
 }
