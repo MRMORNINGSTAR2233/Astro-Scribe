@@ -101,6 +101,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tesseract.js": "^6.0.1",
     "three": "latest",
+    "tsx": "^4.20.6",
     "use-sync-external-store": "latest",
     "vaul": "^0.9.9",
     "zod": "3.25.67",
@@ -115,7 +116,6 @@
     "jest": "^30.2.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
-    "tsx": "^4.20.6",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
   }

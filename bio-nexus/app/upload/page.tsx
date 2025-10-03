@@ -104,6 +104,10 @@ export default function UploadPage() {
         const result = await response.json()
 
         if (result.success) {
+          // Find the result that matches our file (should be the first one in most cases)
+          // If no matching result is found, use the first one as fallback
+          const fileResult = result.results.length > 0 ? result.results[0] : null
+          
           // Update status to completed
           setFiles(prev => prev.map(f => 
             f.id === file.id 
@@ -111,7 +115,7 @@ export default function UploadPage() {
                   ...f, 
                   status: 'completed', 
                   progress: 100,
-                  result: result.results[0] // Assuming single file upload
+                  result: fileResult
                 }
               : f
           ))
@@ -120,6 +124,7 @@ export default function UploadPage() {
         }
 
       } catch (error) {
+        console.error('Upload error for file:', file.name, error);
         setFiles(prev => prev.map(f => 
           f.id === file.id 
             ? { 
@@ -131,6 +136,9 @@ export default function UploadPage() {
             : f
         ))
       }
+      
+      // Add a short delay between file uploads to avoid overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     setIsUploading(false)
@@ -307,9 +315,11 @@ export default function UploadPage() {
                             Successfully processed!
                           </p>
                           <div className="mt-1 text-green-700 dark:text-green-300">
-                            <p><strong>Title:</strong> {file.result.title}</p>
-                            <p><strong>Authors:</strong> {file.result.authors.join(', ')}</p>
-                            <p><strong>Chunks created:</strong> {file.result.chunksCreated}</p>
+                            <p><strong>Title:</strong> {file.result.title || 'Untitled'}</p>
+                            <p><strong>Authors:</strong> {Array.isArray(file.result.authors) ? file.result.authors.join(', ') : 
+                              typeof file.result.authors === 'string' ? file.result.authors : 'Unknown'}</p>
+                            <p><strong>Chunks created:</strong> {file.result.chunksCreated || 0}</p>
+                            <p><strong>Paper ID:</strong> {file.result.paperId || 'N/A'}</p>
                           </div>
                         </div>
                       </div>

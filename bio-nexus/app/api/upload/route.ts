@@ -7,144 +7,53 @@ import { AIServices } from '@/lib/ai-services'
 import { addPaperToKnowledgeGraph } from '@/lib/knowledge-graph'
 import { PDFProcessor } from '@/lib/pdf-processor'
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    console.log('Upload API: Starting file upload process')
-    
-    // Check content type
-    const contentType = request.headers.get('content-type')
-    if (!contentType || !contentType.includes('multipart/form-data')) {
-      return NextResponse.json(
-        { error: 'Request must be multipart/form-data' },
-        { status: 400 }
-      )
-    }
-    
-    const formData = await request.formData()
-    console.log('Upload API: FormData extracted successfully')
-    
-    const files = formData.getAll('files') as File[]
-    console.log('Upload API: Files extracted from FormData:', files.length)
-    
-    if (!files || files.length === 0) {
-      console.log('Upload API: No files found in request')
-      return NextResponse.json(
-        { error: 'No files uploaded' },
-        { status: 400 }
-      )
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return new NextResponse('No file provided', { status: 400 });
     }
 
-    // Additional validation for files array
-    const validFiles = files.filter(f => f && f instanceof File && f.name)
-    console.log('Upload API: Valid files count:', validFiles.length)
+    // Save file to temporary location first
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
     
-    if (validFiles.length === 0) {
-      return NextResponse.json(
-        { error: 'No valid files found in upload' },
-        { status: 400 }
-      )
+    // Ensure temp directory exists
+    const tempDir = path.join(process.cwd(), 'temp');
+    if (!existsSync(tempDir)) {
+      await mkdir(tempDir, { recursive: true });
     }
-
-    const uploadDir = path.join(process.cwd(), 'uploads')
     
-    // Create uploads directory if it doesn't exist
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
+    // Save temp file
+    const tempFilePath = path.join(tempDir, file.name);
+    await writeFile(tempFilePath, buffer);
+    
+    // Process the file with existing processPDF function
+    try {
+      const result = await processPDF(tempFilePath, file.name);
+      
+      // Return success with document ID
+      return NextResponse.json({
+        success: true,
+        paperId: result.paperId,
+        message: 'Document uploaded and processed successfully'
+      });
+      
+    } catch (err: any) {
+      console.error("PDF processing error:", err);
+      return NextResponse.json({
+        success: false,
+        message: `Error processing PDF: ${err.message}`
+      }, { status: 500 });
     }
-
-    const results = []
-    const errors = []
-
-    for (const file of validFiles) {
-      console.log('Upload API: Processing file:', file.name, 'Size:', file.size)
-      try {
-        // Validate file object
-        if (!file || !file.name) {
-          errors.push({
-            filename: 'Unknown file',
-            error: 'Invalid file object - missing name property'
-          })
-          continue
-        }
-
-        // Validate file type
-        const fileName = file.name || ''
-        if (!fileName.toLowerCase().endsWith('.pdf')) {
-          errors.push({
-            filename: fileName || 'Unknown file',
-            error: 'Only PDF files are supported'
-          })
-          continue
-        }
-
-        // Validate file size (50MB limit)
-        const fileSize = file.size || 0
-        if (fileSize > 50 * 1024 * 1024) {
-          errors.push({
-            filename: fileName,
-            error: 'File size exceeds 50MB limit'
-          })
-          continue
-        }
-
-        // Validate file has content
-        if (fileSize === 0) {
-          errors.push({
-            filename: fileName,
-            error: 'File appears to be empty'
-          })
-          continue
-        }
-
-        const bytes = await file.arrayBuffer()
-        const buffer = Buffer.from(bytes)
-        
-        // Generate unique filename
-        const timestamp = Date.now()
-        const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const filename = `${timestamp}_${cleanName}`
-        const filepath = path.join(uploadDir, filename)
-
-        // Save file to disk
-        await writeFile(filepath, buffer)
-
-        // Process the PDF
-        const processingResult = await processPDF(filepath, fileName)
-        
-        results.push({
-          filename: fileName,
-          size: fileSize,
-          processed: true,
-          paperId: processingResult.paperId,
-          extractedText: processingResult.extractedText.substring(0, 500) + '...',
-          metadata: processingResult.metadata,
-          chunksCreated: processingResult.chunksCreated,
-          embeddingsGenerated: processingResult.embeddingsGenerated
-        })
-
-      } catch (error) {
-        console.error(`Error processing ${file?.name || 'unknown file'}:`, error)
-        errors.push({
-          filename: file?.name || 'unknown file',
-          error: error instanceof Error ? error.message : 'Unknown error occurred'
-        })
-      }
-    }
-
+  } catch (err: any) {
+    console.error("Upload error:", err);
     return NextResponse.json({
-      success: true,
-      processed: results.length,
-      failed: errors.length,
-      results,
-      errors
-    })
-
-  } catch (error) {
-    console.error('Upload API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      success: false,
+      message: `Error uploading file: ${err.message}`
+    }, { status: 500 });
   }
 }
 

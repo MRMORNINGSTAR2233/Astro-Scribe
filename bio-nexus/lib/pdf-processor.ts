@@ -1,9 +1,9 @@
 import fs from 'fs'
 import path from 'path'
-// import pdf from 'pdf-parse'  // Temporarily disabled for Docker build
+import pdf from 'pdf-parse'  // PDF parsing library
 import mammoth from 'mammoth'
-// Commented out for now to avoid build issues
-// import { createWorker } from 'tesseract.js'
+// Partial OCR support
+import { createWorker } from 'tesseract.js'
 // import { fromPath } from 'pdf2pic'
 
 export interface PDFExtractionResult {
@@ -18,10 +18,34 @@ export interface PDFExtractionResult {
     pageCount?: number
     fileSize?: number
     processingMethod: 'pdf-parse' | 'ocr' | 'hybrid'
+    publicationDate?: string | null
   }
 }
 
 export class PDFProcessor {
+  private authorPatterns = [
+    /author[s]?[\s:]+([^.]+)/i,
+    /by[\s:]+([^.]+)/i,
+    /authors?[\s:]+((?:[A-Z][a-z]+ [A-Z][a-z]+(?:,|;| and | & )?)+)/i
+  ];
+
+  private affiliationPatterns = [
+    /affiliation[s]?[\s:]+([^.]+)/i,
+    /department[s]?[\s:]+([^.]+)/i,
+    /institute[s]?[\s:]+([^.]+)/i,
+    /university[\s:]+([^.]+)/i,
+    /address[es]?[\s:]+([^.]+)/i,
+  ];
+
+  private abstractPatterns = [
+    /abstract[\s:]+([^.]+(\.[^.]+){1,10})/i,
+    /summary[\s:]+([^.]+(\.[^.]+){1,5})/i
+  ];
+
+  private datePatterns = [
+    /(?:published|date|received):?\s*(\d{1,2}[\s\.\/-]\d{1,2}[\s\.\/-]\d{2,4}|\w+\s+\d{1,2},?\s+\d{4}|\d{4})/i,
+    /(?:\d{1,2}[\s\.\/-]\d{1,2}[\s\.\/-]\d{2,4}|\w+\s+\d{1,2},?\s+\d{4})/i
+  ];
   
   /**
    * Extract text and metadata from a PDF file
@@ -31,10 +55,22 @@ export class PDFProcessor {
       // Get file stats
       const stats = fs.statSync(filePath)
       const fileSize = stats.size
+      const fileName = path.basename(filePath)
 
       // First, try standard PDF text extraction
       const buffer = fs.readFileSync(filePath)
       let extractionResult = await this.extractWithPdfParse(buffer)
+      
+      // Extract basic file metadata if not available
+      if (!extractionResult.metadata.title) {
+        extractionResult.metadata.title = fileName.replace('.pdf', '').replace(/[_-]/g, ' ')
+      }
+      
+      if (!extractionResult.metadata.authors || extractionResult.metadata.authors.length === 0) {
+        extractionResult.metadata.authors = ['NASA Research Team']
+      }
+      
+      extractionResult.metadata.fileSize = fileSize
       
       // If text extraction yields poor results, try OCR
       if (this.isTextExtractionPoor(extractionResult.text)) {
@@ -79,26 +115,43 @@ export class PDFProcessor {
    */
   private async extractWithPdfParse(buffer: Buffer): Promise<PDFExtractionResult> {
     try {
-      // For now, return a basic extraction result with placeholder text
-      // This avoids the build issues with pdf-parse in Docker
-      const text = `Extracted text from PDF document.
+      console.log('Parsing PDF with pdf-parse...');
       
-Title: Research Paper
-Abstract: This document contains research findings and analysis.
-Content: The document has been uploaded and processed successfully. 
-The text extraction is working and the document is now available in the knowledge base.
-
-This is a temporary implementation while we resolve the pdf-parse library issues in the Docker environment.
-The document structure and content will be properly extracted once the parsing library is fully configured.`
-
+      // Use actual pdf-parse library to extract text
+      const data = await pdf(buffer, {
+        max: 0, // No page limit
+        pagerender: function pagerender(pageData) {
+          return pageData.getTextContent()
+            .then(function(textContent: any) {
+              let lastY: number | undefined, text = '';
+              for (let item of textContent.items) {
+                if (lastY == item.transform[5] || !lastY){
+                  text += item.str;
+                } else {
+                  text += '\n' + item.str;
+                }    
+                lastY = item.transform[5];
+              }
+              return text;
+            });
+        }
+      });
+      
+      // Extract text and metadata from the result
+      const text = data.text || '';
+      const info = data.info || {};
+      const metadata = {
+        title: info.Title || info.title || '',
+        authors: info.Author ? [info.Author] : (info.author ? [info.author] : []),
+        pageCount: data.numpages || 0,
+        processingMethod: 'pdf-parse' as const
+      };
+      
+      console.log('PDF parsing complete. Text length:', text.length, 'Pages:', metadata.pageCount);
+      
       return {
         text: text,
-        metadata: {
-          title: 'Uploaded Document',
-          authors: ['Unknown'],
-          pageCount: 1,
-          processingMethod: 'pdf-parse' as const
-        }
+        metadata: metadata
       }
     } catch (error) {
       console.error('PDF parse error:', error)
@@ -125,44 +178,144 @@ The document structure and content will be properly extracted once the parsing l
       // Extract title (usually in the first few lines)
       const lines = text.split('\n').filter(line => line.trim().length > 0)
       if (lines.length > 0) {
-        // Find the longest line in the first 10 lines as potential title
-        const titleCandidate = lines.slice(0, 10)
-          .reduce((longest, current) => current.length > longest.length ? current : longest, '')
-          .trim()
+        // Check for specific title patterns first
+        const titlePatterns = [
+          /Title:\s*([^\n]+)/i,
+          /^(?:TITLE|RESEARCH PAPER|ARTICLE|PUBLICATION):\s*([^\n]+)/im
+        ];
         
-        if (titleCandidate.length > 10 && titleCandidate.length < 200) {
-          metadata.title = titleCandidate
+        let foundTitle = false;
+        for (const pattern of titlePatterns) {
+          const match = text.match(pattern);
+          if (match && match[1] && match[1].length > 5) {
+            metadata.title = match[1].trim();
+            foundTitle = true;
+            break;
+          }
+        }
+        
+        // If no specific title pattern found, use the longest line in the first 10 lines
+        if (!foundTitle) {
+          const titleCandidate = lines.slice(0, 10)
+            .reduce((longest, current) => 
+              (current.length > longest.length && current.length < 200) ? current : longest, '')
+            .trim()
+          
+          if (titleCandidate.length > 10 && titleCandidate.length < 200) {
+            metadata.title = titleCandidate
+          }
         }
       }
 
-      // Extract authors (look for common patterns)
+      // Extract authors using multiple approaches
+      // 1. First, check for specific author patterns
       const authorPatterns = [
-        /(?:Author[s]?|By)\s*:?\s*([A-Z][a-z]+ [A-Z][a-z]+(?:,\s*[A-Z][a-z]+ [A-Z][a-z]+)*)/i,
-        /([A-Z][a-z]+ [A-Z]\. [A-Z][a-z]+(?:,\s*[A-Z][a-z]+ [A-Z]\. [A-Z][a-z]+)*)/,
-        /^([A-Z][a-z]+ [A-Z][a-z]+(?:,\s*[A-Z][a-z]+ [A-Z][a-z]+)*)\s*$/m
+        /(?:Author[s]?|By)\s*:?\s*([A-Za-z][a-z]+(?: [A-Za-z][a-z.]+)+(,\s*[A-Za-z][a-z]+(?: [A-Za-z][a-z.]+)+)*)/i,
+        /([A-Za-z][a-z]+ [A-Za-z]\. [A-Za-z][a-z]+(?:,\s*[A-Za-z][a-z]+ [A-Za-z]\. [A-Za-z][a-z]+)*)/,
+        /^(?:AUTHORS|RESEARCHER[S]?):\s*([^\n]+)/im,
+        // Look for typical author listing formats
+        /\b([A-Za-z][a-z]+(?: [A-Za-z][a-z.]+){1,3}(?:,\s*(?:and\s*)?[A-Za-z][a-z]+(?: [A-Za-z][a-z.]+){1,3})*)\b/
       ]
 
-      for (const pattern of authorPatterns) {
+      // 2. Check for authors with affiliations pattern (common in research papers)
+      const affiliationPatterns = [
+        /([A-Za-z][a-z]+(?: [A-Za-z][a-z.]+)+)(?:\s*\d+|\s*\*)(?:,\s*([A-Za-z][a-z]+(?: [A-Za-z][a-z.]+)+)(?:\s*\d+|\s*\*))*/
+      ]
+      
+      let authorFound = false;
+      
+      // Try all author patterns
+      for (const pattern of [...authorPatterns, ...affiliationPatterns]) {
         const match = text.match(pattern)
-        if (match) {
-          metadata.authors = match[1].split(',').map(author => author.trim())
-          break
+        if (match && match[1]) {
+          // Split by common separators
+          const authorText = match[1];
+          const authors = authorText.split(/,|;|and/).map(author => author.trim()).filter(a => a.length > 0);
+          
+          if (authors.length > 0) {
+            metadata.authors = authors;
+            authorFound = true;
+            break;
+          }
         }
       }
-
-      // Extract publication year
-      const yearPattern = /(?:19|20)\d{2}/g
-      const years = text.match(yearPattern)
-      if (years) {
-        // Take the most recent reasonable year
-        const recentYears = years
-          .map(y => parseInt(y))
-          .filter(y => y >= 1900 && y <= new Date().getFullYear())
-          .sort((a, b) => b - a)
+      
+      // If no authors found yet, try a more aggressive search in the first few paragraphs
+      if (!authorFound) {
+        // Look for lines that likely contain author names in the first 20 lines
+        const potentialAuthorLines = lines.slice(0, 20).filter(line => {
+          // Lines with multiple names but not too long (avoid table of contents)
+          return line.length > 5 && 
+                line.length < 100 && 
+                /[A-Z][a-z]+ [A-Z]/.test(line) && 
+                !/title|abstract|introduction|chapter|section|table|figure/i.test(line);
+        });
         
-        if (recentYears.length > 0) {
-          metadata.year = recentYears[0]
+        if (potentialAuthorLines.length > 0) {
+          // Use the shortest line that likely has names as it's most likely the author list
+          const authorLine = potentialAuthorLines.reduce((shortest, current) => 
+            current.length < shortest.length ? current : shortest, potentialAuthorLines[0]);
+            
+          // Extract names from this line
+          const names = authorLine.split(/,|;|and|\s{2,}/).map(name => name.trim()).filter(name => {
+            return name.length > 0 && /[A-Z][a-z]+/.test(name);
+          });
+          
+          if (names.length > 0) {
+            metadata.authors = names;
+            authorFound = true;
+          }
         }
+      }
+      
+      // If still no authors found, extract from filename or use default
+      if (!metadata.authors || metadata.authors.length === 0) {
+        console.log('No authors found in text, using default');
+        metadata.authors = ['NASA Research Team'];
+      }
+
+      // Extract publication date and year
+      // First try to find a full date
+      for (const pattern of this.datePatterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+          metadata.publicationDate = match[1].trim();
+          
+          // Extract year from date
+          const yearMatch = metadata.publicationDate.match(/\d{4}/);
+          if (yearMatch) {
+            metadata.year = parseInt(yearMatch[0], 10);
+            break;
+          }
+        }
+      }
+      
+      // If no year found from date, try to find just a year
+      if (!metadata.year) {
+        const yearPattern = /(?:19|20)\d{2}/g
+        const years = text.match(yearPattern)
+        if (years) {
+          // Take the most recent reasonable year
+          const recentYears = years
+            .map(y => parseInt(y))
+            .filter(y => y >= 1900 && y <= new Date().getFullYear())
+            .sort((a, b) => b - a)
+          
+          if (recentYears.length > 0) {
+            metadata.year = recentYears[0];
+            
+            // Set publication date to year only if not already set
+            if (!metadata.publicationDate) {
+              metadata.publicationDate = recentYears[0].toString();
+            }
+          }
+        }
+      }
+      
+      // Default to current year if none found
+      if (!metadata.year) {
+        metadata.year = new Date().getFullYear();
+        metadata.publicationDate = metadata.publicationDate || new Date().toISOString().split('T')[0];
       }
 
       // Extract abstract (look for "Abstract" section)
