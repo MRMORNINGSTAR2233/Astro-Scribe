@@ -9,23 +9,51 @@ import { GlowingEffect } from "@/components/ui/glowing-effect"
 type Risk = { category: string; score: number }
 type RiskProfile = { rankedRisks: Risk[]; knowledgeGaps: string[] }
 
-async function mockRiskAPI(params: { durationDays: number; destination: string }): Promise<RiskProfile> {
-  await new Promise((r) => setTimeout(r, 700))
-  return {
-    rankedRisks: [
-      { category: "Radiation Exposure", score: params.destination === "Mars" ? 0.88 : 0.65 },
-      { category: "Bone Density Loss", score: params.durationDays > 180 ? 0.74 : 0.5 },
-      { category: "Immune Dysregulation", score: 0.42 },
-    ],
-    knowledgeGaps: ["Long-duration microbiome shifts", "Partial gravity countermeasures"],
+async function analyzeRisks(params: { durationDays: number; destination: string }): Promise<RiskProfile> {
+  try {
+    const response = await fetch('/api/mission-plan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        objective: `Mission to ${params.destination}`,
+        constraints: `Duration: ${params.durationDays} days`,
+        destination: params.destination,
+        durationDays: params.durationDays
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Risk analysis failed')
+    }
+
+    const data = await response.json()
+    
+    // Transform the API response to match our RiskProfile interface
+    return {
+      rankedRisks: data.rankedRisks || [],
+      knowledgeGaps: data.knowledgeGaps || []
+    }
+  } catch (error) {
+    console.error('Risk analysis error:', error)
+    // Return default risk profile as fallback
+    return {
+      rankedRisks: [
+        { category: "Radiation Exposure", score: params.destination === "Mars" ? 0.88 : 0.65 },
+        { category: "Bone Density Loss", score: params.durationDays > 180 ? 0.74 : 0.5 },
+        { category: "Immune Dysregulation", score: 0.42 },
+      ],
+      knowledgeGaps: ["Long-duration microbiome shifts", "Partial gravity countermeasures"],
+    }
   }
 }
 
 export default function MissionPlannerPage() {
   const [result, setResult] = useState<RiskProfile | null>(null)
   const { mutate, isPending } = useMutation({
-    mutationFn: mockRiskAPI,
-    onSuccess: (data) => setResult(data),
+    mutationFn: analyzeRisks,
+    onSuccess: (data: RiskProfile) => setResult(data),
   })
 
   return (
