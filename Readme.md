@@ -9,6 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?style=for-the-badge&logo=streamlit)](https://streamlit.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
+[![Docker Hub](https://img.shields.io/badge/Docker_Hub-Available-blue?style=for-the-badge&logo=docker)](https://hub.docker.com/r/mrmorningstar2233/nasa-knowledge-search-streamlit_app)
 [![Neo4j](https://img.shields.io/badge/Neo4j-5.18-green?style=for-the-badge&logo=neo4j)](https://neo4j.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
 
@@ -17,6 +18,8 @@
 ## 🌟 Overview
 
 Astro-Scribe is a cutting-edge knowledge discovery platform built with **Python and Streamlit** that transforms NASA's vast collection of research documents into an intelligent, searchable database. Using advanced AI technologies including LangChain, vector embeddings, knowledge graphs, and multi-agent systems, it provides researchers with unprecedented access to space science information through an intuitive web interface.
+
+🚀 **Quick Start**: Try it instantly with our pre-built Docker image from [Docker Hub](https://hub.docker.com/r/mrmorningstar2233/nasa-knowledge-search-streamlit_app)!
 
 ## ✨ Key Features
 
@@ -92,6 +95,17 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 3. Launch with Docker
+
+#### Option A: Using Pre-built Docker Image (Recommended)
+
+```bash
+# Pull and run the pre-built image from Docker Hub
+docker run -p 8501:8501 mrmorningstar2233/nasa-knowledge-search-streamlit_app:latest
+```
+
+🐳 **Docker Hub Repository**: [mrmorningstar2233/nasa-knowledge-search-streamlit_app](https://hub.docker.com/r/mrmorningstar2233/nasa-knowledge-search-streamlit_app)
+
+#### Option B: Build from Source
 
 ```bash
 docker-compose up -d
