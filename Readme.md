@@ -6,8 +6,8 @@
 
 *Transform NASA research documents into an intelligent, searchable knowledge base with AI-powered insights*
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?style=for-the-badge&logo=streamlit)](https://streamlit.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![Neo4j](https://img.shields.io/badge/Neo4j-5.18-green?style=for-the-badge&logo=neo4j)](https://neo4j.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
@@ -16,33 +16,37 @@
 
 ## 🌟 Overview
 
-Astro-Scribe is a cutting-edge knowledge discovery platform that transforms NASA's vast collection of research documents into an intelligent, searchable database. Using advanced AI technologies including vector embeddings, knowledge graphs, and multi-agent systems, it provides researchers with unprecedented access to space science information.
+Astro-Scribe is a cutting-edge knowledge discovery platform built with **Python and Streamlit** that transforms NASA's vast collection of research documents into an intelligent, searchable database. Using advanced AI technologies including LangChain, vector embeddings, knowledge graphs, and multi-agent systems, it provides researchers with unprecedented access to space science information through an intuitive web interface.
 
 ## ✨ Key Features
 
 ### 🧠 **Advanced AI Processing**
-- **Multi-Modal Document Analysis**: Intelligent PDF processing with OCR fallback
-- **Vector Embeddings**: Semantic search using state-of-the-art embedding models
-- **Knowledge Graphs**: Automated entity extraction and relationship mapping
-- **Multi-Agent AI**: Specialized agents for research synthesis and fact-checking
+
+- **Multi-Modal Document Analysis**: Intelligent PDF processing with OCR fallback using PyPDF2
+- **Vector Embeddings**: Semantic search using LangChain and Google Gemini embeddings
+- **Knowledge Graphs**: Automated entity extraction and relationship mapping with Neo4j
+- **Multi-Agent AI**: Specialized agents powered by LangChain and CrewAI for research synthesis
 
 ### 🔍 **Intelligent Search & Discovery**
-- **Semantic Search**: Find documents by meaning, not just keywords
+
+- **Semantic Search**: Find documents by meaning using vector similarity search
 - **Knowledge Graph Navigation**: Explore connections between concepts and authors
 - **Citation Networks**: Trace research lineages and dependencies
-- **Interactive Chat**: AI-powered conversations with source citations
+- **Interactive Chat**: AI-powered conversations with source citations using Streamlit Chat
 
 ### 📊 **Rich Analytics & Insights**
-- **Research Trends**: Identify emerging topics and patterns
-- **Author Networks**: Discover collaboration patterns
-- **Publication Analytics**: Track research output over time
+
+- **Research Trends**: Identify emerging topics and patterns with Plotly visualizations
+- **Author Networks**: Discover collaboration patterns through network analysis
+- **Publication Analytics**: Track research output over time with interactive dashboards
 - **Impact Metrics**: Measure document influence and citations
 
 ### 🏗️ **Modern Architecture**
-- **Microservices Design**: Scalable, maintainable architecture
-- **Docker Containerized**: Easy deployment and development
-- **Real-time Processing**: Instant indexing and search capabilities
-- **RESTful APIs**: Extensible integration points
+
+- **Streamlit Framework**: Rapid prototyping and deployment of ML applications
+- **LangChain Integration**: Advanced LLM orchestration and RAG capabilities
+- **Docker Containerized**: Easy deployment and development environment
+- **RESTful APIs**: Extensible integration points for external systems
 
 ## 🛠️ Technology Stack
 
@@ -50,9 +54,9 @@ Astro-Scribe is a cutting-edge knowledge discovery platform that transforms NASA
 
 | **Frontend** | **Backend** | **Database** | **AI/ML** |
 |:---:|:---:|:---:|:---:|
-| ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white) | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white) | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white) | ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white) |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white) | ![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white) | ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat&logo=neo4j&logoColor=white) | ![Groq](https://img.shields.io/badge/Groq-FF6B35?style=flat&logoColor=white) |
-| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis&logoColor=white) | ![Google AI](https://img.shields.io/badge/Google_AI-4285F4?style=flat&logo=google&logoColor=white) |
+| ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) | ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white) | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white) | ![LangChain](https://img.shields.io/badge/LangChain-00FF00?style=flat&logoColor=white) |
+| ![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white) | ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white) | ![Neo4j](https://img.shields.io/badge/Neo4j-008CC1?style=flat&logo=neo4j&logoColor=white) | ![Groq](https://img.shields.io/badge/Groq-FF6B35?style=flat&logoColor=white) |
+| ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white) | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | ![pgvector](https://img.shields.io/badge/pgvector-336791?style=flat&logo=postgresql&logoColor=white) | ![Google AI](https://img.shields.io/badge/Google_AI-4285F4?style=flat&logo=google&logoColor=white) |
 
 </div>
 
@@ -61,24 +65,24 @@ Astro-Scribe is a cutting-edge knowledge discovery platform that transforms NASA
 ### Prerequisites
 
 - **Docker & Docker Compose** (recommended)
-- **Node.js 18+** (for local development)
+- **Python 3.10+** (for local development)
 - **API Keys**: Groq, Google Gemini
 
 ### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/MRMORNINGSTAR2233/Astro-Scribe.git
-cd Astro-Scribe
+cd Astro-Scribe/bio-nexus/nasa-knowledge-search
 ```
 
 ### 2. Environment Setup
 
 ```bash
 # Copy environment template
-cp bio-nexus/.env.docker.example bio-nexus/.env.docker
+cp .env.example .env
 
 # Edit with your API keys
-nano bio-nexus/.env.docker
+nano .env
 ```
 
 Required API keys:
@@ -90,13 +94,12 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ### 3. Launch with Docker
 
 ```bash
-cd bio-nexus
 docker-compose up -d
 ```
 
 ### 4. Access the Platform
 
-- **🌐 Main Application**: [http://localhost:3000](http://localhost:3000)
+- **🌐 Main Application**: [http://localhost:8501](http://localhost:8501)
 - **📊 Neo4j Browser**: [http://localhost:7474](http://localhost:7474)
 - **🔧 Database**: PostgreSQL on port 5432
 
@@ -104,33 +107,39 @@ docker-compose up -d
 
 ```
 Astro-Scribe/
-├── 📱 bio-nexus/                 # Main Next.js application
-│   ├── app/                      # Next.js app router
-│   │   ├── api/                  # API routes
-│   │   ├── dashboard/            # Analytics dashboard
-│   │   └── upload/               # Document upload interface
-│   ├── components/               # Reusable UI components
-│   ├── lib/                      # Core libraries
-│   │   ├── ai-services.ts        # AI integration
-│   │   ├── knowledge-graph.ts    # Neo4j operations
-│   │   └── pdf-processor.ts      # Document processing
-│   ├── database/                 # Database schemas
-│   └── docker-compose.yml        # Container orchestration
+├── 📱 bio-nexus/
+│   └── nasa-knowledge-search/    # Main Streamlit application
+│       ├── app.py                # Main Streamlit app entry point
+│       ├── pages/                # Streamlit pages
+│       │   ├── dashboard.py      # Analytics dashboard
+│       │   ├── upload.py         # Document upload interface
+│       │   ├── chat.py           # AI chat interface
+│       │   └── settings.py       # Configuration settings
+│       ├── src/                  # Core Python modules
+│       │   ├── agents.py         # LangChain AI agents
+│       │   ├── database.py       # PostgreSQL operations
+│       │   ├── neo4j_manager.py  # Knowledge graph operations
+│       │   ├── rag_system.py     # RAG implementation
+│       │   └── document_processor.py # PDF processing
+│       ├── requirements.txt      # Python dependencies
+│       └── docker-compose.yml    # Container orchestration
 ├── 📄 nasa-pdf/                 # NASA research documents (571 PDFs)
 └── 🔧 scripts/                  # Utility scripts
 ```
 
 ## 🎯 Usage Examples
 
-### Document Upload & Processing
+### Running the Streamlit Application
 
 ```bash
-# Single document upload
-curl -X POST http://localhost:3000/api/upload \
-  -F "file=@nasa-document.pdf"
+# Install dependencies
+pip install -r requirements.txt
 
-# Bulk upload NASA documents
-node scripts/bulk-upload.js
+# Start the Streamlit app
+streamlit run app.py
+
+# Or use Docker
+docker-compose up -d
 ```
 
 ### Knowledge Graph Queries
@@ -147,18 +156,23 @@ WHERE a1 <> a2
 RETURN a1.name, a2.name, COUNT(p) as collaborations
 ```
 
-### Semantic Search API
+### Python API Usage
 
-```javascript
-// Search for relevant documents
-const response = await fetch('/api/search', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    query: "effects of microgravity on plant growth",
-    limit: 10
-  })
-});
+```python
+# Using the RAG system
+from src.rag_system import get_rag_system
+
+rag = get_rag_system()
+response = rag.query(
+    "effects of microgravity on plant growth",
+    max_results=10
+)
+
+# Working with the knowledge graph
+from src.neo4j_manager import get_neo4j_manager
+
+neo4j = get_neo4j_manager()
+authors = neo4j.find_collaborating_authors("space biology")
 ```
 
 ## 📊 Dashboard Features
@@ -194,18 +208,25 @@ We welcome contributions! Here's how to get started:
 ### Development Setup
 
 ```bash
+# Clone and navigate to project
+cd bio-nexus/nasa-knowledge-search
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
-cd bio-nexus
-npm install
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your API keys
 
 # Start development server
-npm run dev
+streamlit run app.py
 
-# Run tests
-npm test
-
-# Type checking
-npm run type-check
+# Run in development mode with auto-reload
+streamlit run app.py --server.runOnSave true
 ```
 
 ## 🐛 Troubleshooting
@@ -242,10 +263,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **NASA** for providing open access to research documents
+- **Streamlit** for the amazing web app framework
+- **LangChain** for LLM orchestration and RAG capabilities
 - **CrewAI** for multi-agent framework inspiration
-- **OpenAI** and **Google** for AI model APIs
+- **Groq** and **Google** for AI model APIs
 - **Neo4j** for knowledge graph technology
-- **Vercel** for Next.js framework
+- **PostgreSQL** and **pgvector** for vector database capabilities
 
 ## 📞 Support
 
