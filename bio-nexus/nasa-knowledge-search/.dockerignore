@@ -1,0 +1,55 @@
+# Git files
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache
+
+# Documentation
+*.md
+README*
+CHANGELOG*
+docs/
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Mac files
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env.example
+
+# Node modules (if any)
+node_modules
+
+# Large data files
+*.zip
+*.tar
+*.gz
+nasa-pdf/
+
+# Test files
+tests/
+test_*
+
+# Build artifacts
+build/
+dist/
+*.egg-info

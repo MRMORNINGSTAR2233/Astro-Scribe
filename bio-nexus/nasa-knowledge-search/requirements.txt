@@ -1,0 +1,50 @@
+# Core dependencies
+streamlit
+streamlit-chat
+streamlit-extras
+
+# AI and ML (minimal pins to avoid conflicts)
+langchain
+langchain-community
+langchain-core
+langchain-google-genai
+langchain-groq
+langgraph
+groq
+google-generativeai
+
+# Document processing
+pypdf2
+python-docx
+python-pptx
+
+# Database
+psycopg2-binary
+pgvector
+neo4j
+chromadb
+
+# Web scraping and HTTP
+requests
+beautifulsoup4
+
+# Data processing
+pandas
+numpy
+matplotlib
+plotly
+
+# Utilities
+python-dotenv
+pydantic
+aiofiles
+
+# Image processing
+Pillow
+
+# Authentication and session management
+streamlit-authenticator
+
+# Additional utilities
+tqdm
+httpx

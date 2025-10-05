@@ -1,2 +1,64 @@
-nasa-pdf
-downloaded_pdfs
+# NASA PDF documents (too large for git)
+nasa-pdf/
+downloaded_pdfs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Docker volumes and temp files
+uploads/
+temp/
+*.tmp
+
+# Keep important images
+!astro-scribe-dashboard.png
+!**/screenshots/*.png
